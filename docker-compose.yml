@@ -5,7 +5,7 @@ services:
     image: contactifications
     env_file:
       - .env
-    command: --slackToken="${SLACK_TOKEN}" --slackChannel="${SLACK_CHANNEL}"
+    command: --slackToken="${SLACK_TOKEN}" --slackChannel="${SLACK_CHANNEL}" --companyName="${COMPANY_NAME}" --logoURL="${LOGO_URL}" --websiteURL="${WEBSITE_URL}" --message="${MESSAGE}"
     ports:
       - "${PORT}:1789"
     expose:

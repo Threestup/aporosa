@@ -40,6 +40,12 @@ var (
 	slackToken   string
 	slackChannel string
 	outDir       string
+	companyName  string
+	websiteURL   string
+	logoURL      string
+	message      string
+
+	messageStr string
 
 	errMethodNotAllowed   = errors.New("method not allowed")
 	errPageNotFound       = errors.New("page not found")
@@ -59,9 +65,17 @@ func init() {
 	cmd.PersistentFlags().StringVar(&outDir, "outDir", ".", "output directory for new contacts request")
 	cmd.PersistentFlags().StringVar(&slackChannel, "slackChannel", "", "slack channel in which to send the notifications")
 	cmd.PersistentFlags().StringVar(&slackToken, "slackToken", "", "slack token for authentication")
+	cmd.PersistentFlags().StringVar(&companyName, "companyName", "", "company name to use with the slack bot")
+	cmd.PersistentFlags().StringVar(&websiteURL, "websiteURL", "", "website where the form is used")
+	cmd.PersistentFlags().StringVar(&logoURL, "logoURL", "", "logo URL")
+	cmd.PersistentFlags().StringVar(&message, "message", "", "template file for the message to display in slack")
 
 	cmd.MarkPersistentFlagRequired("slackChannel")
 	cmd.MarkPersistentFlagRequired("slackToken")
+	cmd.MarkPersistentFlagRequired("companyName")
+	cmd.MarkPersistentFlagRequired("websiteURL")
+	cmd.MarkPersistentFlagRequired("logoURL")
+	cmd.MarkPersistentFlagRequired("message")
 }
 
 type handler struct{}
@@ -102,6 +116,11 @@ func (h handler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	// then send to slack
+	if err := sendSlackNotification(); err != nil {
+		fmt.Printf("%v\n", err)
+		rw.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(rw, err.Error())
+	}
 
 	rw.WriteHeader(http.StatusOK)
 	fmt.Fprintf(rw, "all good")
@@ -138,8 +157,36 @@ func dirExists() (bool, error) {
 	return true, err
 }
 
-func sendSlackNotification() {
+func sendSlackNotification() error {
+	att := slack.Attachment{
+		AuthorIcon: logoURL,
+		AuthorName: companyName,
+		Title:      fmt.Sprintf("New contact request for %s", companyName),
+		TitleLink:  websiteURL,
+		Footer:     "New contact request",
+		Ts:         json.Number(fmt.Sprintf("%v", time.Now().Unix())),
+		Text:       fmt.Sprintf(messageStr),
+		MarkdownIn: []string{"text"},
+		ThumbURL:   logoURL,
+	}
 
+	_, _, err := slackClient.PostMessage(
+		slackChannel,
+		"",
+		slack.PostMessageParameters{
+			EscapeText: true,
+			Username:   "NewContact",
+			AsUser:     true,
+			// IconURL:     "https://.slack.com/team/jeremy",
+			Attachments: []slack.Attachment{att},
+		},
+	)
+
+	if err != nil {
+		return fmt.Errorf("unable to send slack message: %v", err)
+	}
+
+	return nil
 }
 
 func initSlack() error {
@@ -165,6 +212,13 @@ func main() {
 		return
 	}
 
+	messageBytes, err := ioutil.ReadFile(message)
+	if err != nil {
+		fmt.Printf("%v\n", err)
+		return
+	}
+	messageStr = string(messageBytes)
+
 	sigc := make(chan os.Signal, 1)
 	signal.Notify(sigc,
 		syscall.SIGHUP,
@@ -180,7 +234,7 @@ func main() {
 	}()
 
 	_ = <-sigc
-	err := srv.Close()
+	err = srv.Close()
 	if err != nil {
 		fmt.Printf("Error closing server: %s\n", err.Error())
 	}
