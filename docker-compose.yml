@@ -1,0 +1,14 @@
+version: "2.0"
+services:
+  contactification:
+    build: .
+    image: contactification
+    env_file:
+      - .env
+    command: --slackToken="${SLACK_TOKEN}" --slackChannel="${SLACK_CHANNEL}"
+    ports:
+      - "${PORT}:1789"
+    expose:
+      - "1789"
+    volumes:
+      - "/outputs:${OUTPUT_DIR}"
