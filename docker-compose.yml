@@ -1,8 +1,8 @@
 version: "2.0"
 services:
-  contactification:
+  contactifications:
     build: .
-    image: contactification
+    image: contactifications
     env_file:
       - .env
     command: --slackToken="${SLACK_TOKEN}" --slackChannel="${SLACK_CHANNEL}"
