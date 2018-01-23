@@ -64,45 +64,48 @@ var (
 
 func init() {
 	cmd.PersistentFlags().StringVar(&port, "port", "1789", "port to start the http server")
-	cmd.PersistentFlags().StringVar(&outDir, "outDir", ".", "output directory for new contacts request")
+	cmd.PersistentFlags().StringVar(&outDir, "outDir", "./out", "output directory for new contacts request")
 	cmd.PersistentFlags().StringVar(&slackChannel, "slackChannel", "", "slack channel in which to send the notifications")
 	cmd.PersistentFlags().StringVar(&slackToken, "slackToken", "", "slack token for authentication")
 	cmd.PersistentFlags().StringVar(&companyName, "companyName", "", "company name to use with the slack bot")
 	cmd.PersistentFlags().StringVar(&websiteURL, "websiteURL", "", "website where the form is used")
 	cmd.PersistentFlags().StringVar(&logoURL, "logoURL", "", "logo URL")
-	cmd.PersistentFlags().StringVar(&message, "message", "", "template file for the message to display in slack")
+	cmd.PersistentFlags().StringVar(&message, "messageTemplate", "./tpl.txt", "template file for the message to display in slack")
 
 	cmd.MarkPersistentFlagRequired("slackChannel")
 	cmd.MarkPersistentFlagRequired("slackToken")
 	cmd.MarkPersistentFlagRequired("companyName")
 	cmd.MarkPersistentFlagRequired("websiteURL")
 	cmd.MarkPersistentFlagRequired("logoURL")
-	cmd.MarkPersistentFlagRequired("message")
 }
 
 type handler struct{}
+
+func earlyExitWithError(rw http.ResponseWriter, r *http.Request, err error, status int) {
+	fmt.Printf("from=\"%v\" error=\"%v\" ts=\"%v\"\n",
+		r.RemoteAddr, err, time.Now().Format("Mon, 2 Jan 2006 15:04:05 MST"))
+	rw.WriteHeader(status)
+	fmt.Fprintf(rw, err.Error())
+}
 
 func (h handler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	// first check the request is well formated
 
 	if r.Method != http.MethodPost {
-		rw.WriteHeader(http.StatusMethodNotAllowed)
-		fmt.Fprintf(rw, errMethodNotAllowed.Error())
+		earlyExitWithError(rw, r, errMethodNotAllowed, http.StatusMethodNotAllowed)
 		return
 	}
 
 	if r.URL.Path != contactNotificationPath {
-		rw.WriteHeader(http.StatusNotFound)
-		fmt.Fprintf(rw, errPageNotFound.Error())
+		earlyExitWithError(rw, r, errPageNotFound, http.StatusNotFound)
 		return
 	}
 
 	// then extract form values
 
 	if err := r.ParseForm(); err != nil {
-		fmt.Printf("%v\n", err)
-		rw.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(rw, err.Error())
+		earlyExitWithError(rw, r, err, http.StatusInternalServerError)
+		return
 	}
 
 	values := map[string]string{}
@@ -112,20 +115,20 @@ func (h handler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 
 	// then write them to a new_file
 	if err := saveContact(values); err != nil {
-		fmt.Printf("%v\n", err)
-		rw.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(rw, err.Error())
+		earlyExitWithError(rw, r, err, http.StatusInternalServerError)
+		return
 	}
 
 	// then send to slack
 	if err := sendSlackNotification(values); err != nil {
-		fmt.Printf("%v\n", err)
-		rw.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(rw, err.Error())
+		earlyExitWithError(rw, r, err, http.StatusInternalServerError)
+		return
 	}
 
+	fmt.Printf("from=%v error=\"none\" ts=%v\n",
+		r.RemoteAddr, time.Now().Format("Mon, 2 Jan 2006 15:04:05 MST"))
 	rw.WriteHeader(http.StatusOK)
-	fmt.Fprintf(rw, "all good")
+	fmt.Fprintf(rw, "")
 }
 
 func saveContact(values map[string]string) error {

@@ -4,13 +4,12 @@ LABEL maintainer "jeremy@threestup.com"
 
 COPY . /go/src/github.com/Threestup/contactifications
 WORKDIR /go/src/github.com/Threestup/contactifications
-
 RUN apk update && apk upgrade && apk add curl openssh git
-RUN curl https://glide.sh/get | sh && glide install && go build
+RUN curl https://glide.sh/get | sh && glide install && go build -o exe
 
-FROM scratch
+FROM alpine:3.7
 
-RUN mkdir /outputs
-COPY --from=build /go/src/github.com/Threestup/contactifications/contactifications /contactifications
+WORKDIR /
+COPY --from=build /go/src/github.com/Threestup/contactifications/exe /exe
 
-ENTRYPOINT ["/contactifications", "--port=1789", "--outDir=/outputs"]
+ENTRYPOINT ["/exe", "--port=1789"]

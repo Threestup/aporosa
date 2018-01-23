@@ -5,10 +5,9 @@ services:
     image: contactifications
     env_file:
       - .env
-    command: --slackToken="${SLACK_TOKEN}" --slackChannel="${SLACK_CHANNEL}" --companyName="${COMPANY_NAME}" --logoURL="${LOGO_URL}" --websiteURL="${WEBSITE_URL}" --message="${MESSAGE}"
+    command: --slackToken="${SLACK_TOKEN}" --slackChannel="${SLACK_CHANNEL}" --companyName="${COMPANY_NAME}" --logoURL="${LOGO_URL}" --websiteURL="${WEBSITE_URL}"
     ports:
       - "${PORT}:1789"
-    expose:
-      - "1789"
     volumes:
-      - "/outputs:${OUTPUT_DIR}"
+      - "${OUTPUT_DIR_PATH}:/out"
+      - "${MESSAGE_TEMPLATE_PATH}:/tpl.txt"
