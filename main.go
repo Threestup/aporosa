@@ -15,6 +15,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -24,6 +25,7 @@ import (
 	"os/signal"
 	"path"
 	"syscall"
+	"text/template"
 	"time"
 
 	"github.com/nlopes/slack"
@@ -45,8 +47,6 @@ var (
 	logoURL      string
 	message      string
 
-	messageStr string
-
 	errMethodNotAllowed   = errors.New("method not allowed")
 	errPageNotFound       = errors.New("page not found")
 	errInvalidContentType = errors.New("invalid content-type")
@@ -58,6 +58,8 @@ var (
 	}
 
 	slackClient *slack.Client
+
+	messageTemplate = template.New("Slack message")
 )
 
 func init() {
@@ -116,7 +118,7 @@ func (h handler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	// then send to slack
-	if err := sendSlackNotification(); err != nil {
+	if err := sendSlackNotification(values); err != nil {
 		fmt.Printf("%v\n", err)
 		rw.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintf(rw, err.Error())
@@ -157,7 +159,14 @@ func dirExists() (bool, error) {
 	return true, err
 }
 
-func sendSlackNotification() error {
+func sendSlackNotification(values map[string]string) error {
+	// use template to generate the message
+	var msg bytes.Buffer
+	err := messageTemplate.Execute(&msg, values)
+	if err != nil {
+		return fmt.Errorf("unable to build template: %v", err)
+	}
+
 	att := slack.Attachment{
 		AuthorIcon: logoURL,
 		AuthorName: companyName,
@@ -165,12 +174,12 @@ func sendSlackNotification() error {
 		TitleLink:  websiteURL,
 		Footer:     "New contact request",
 		Ts:         json.Number(fmt.Sprintf("%v", time.Now().Unix())),
-		Text:       fmt.Sprintf(messageStr),
+		Text:       fmt.Sprintf(msg.String()),
 		MarkdownIn: []string{"text"},
 		ThumbURL:   logoURL,
 	}
 
-	_, _, err := slackClient.PostMessage(
+	_, _, err = slackClient.PostMessage(
 		slackChannel,
 		"",
 		slack.PostMessageParameters{
@@ -202,22 +211,30 @@ func main() {
 		return
 	}
 
+	// check output dir exsits
 	if ok, err := dirExists(); !ok {
 		fmt.Printf("%v\n", err)
 		return
 	}
 
+	// initialize slack client
 	if err := initSlack(); err != nil {
 		fmt.Printf("%v\n", err)
 		return
 	}
 
+	// generate messages template
 	messageBytes, err := ioutil.ReadFile(message)
 	if err != nil {
 		fmt.Printf("%v\n", err)
 		return
 	}
-	messageStr = string(messageBytes)
+
+	messageTemplate, err = messageTemplate.Parse(string(messageBytes))
+	if err != nil {
+		fmt.Printf("unable to parse message template: %v", err)
+		return
+	}
 
 	sigc := make(chan os.Signal, 1)
 	signal.Notify(sigc,
