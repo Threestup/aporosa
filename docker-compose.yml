@@ -10,4 +10,4 @@ services:
       - "${PORT}:1789"
     volumes:
       - "${OUTPUT_DIR_PATH}:/out"
-      - "${MESSAGE_TEMPLATE_PATH}:/tpl.txt"
+      - "${MESSAGE_TEMPLATE_PATH}:/templates"

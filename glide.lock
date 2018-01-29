@@ -1,8 +1,8 @@
 hash: a7e20a8d24e36668bb391bbd6eaede3c293d4fd95cec12ef27010c66ce14765e
-updated: 2018-01-23T21:12:26.701479Z
+updated: 2018-01-29T16:29:37.860227Z
 imports:
 - name: github.com/gorilla/websocket
-  version: 292fd08b2560ad524ee37396253d71570339a821
+  version: 91f589db023d66e4aba7112d44cc0d2fb091c553
 - name: github.com/inconshreveable/mousetrap
   version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
 - name: github.com/nlopes/slack

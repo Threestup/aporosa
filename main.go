@@ -130,7 +130,7 @@ func dirExists(s string) (bool, error) {
 		return true, nil
 	}
 	if os.IsNotExist(err) {
-		return false, fmt.Errorf("%s: no such file or directory", cmd.OutDir)
+		return false, fmt.Errorf("%s: no such file or directory", s)
 	}
 	return true, err
 }
