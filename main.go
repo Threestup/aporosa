@@ -23,13 +23,13 @@ import (
 	"os"
 	"os/signal"
 	"path"
-	"strings"
 	"syscall"
 	"text/template"
 	"time"
 
 	"github.com/Threestup/contactifications/cmd"
 	"github.com/Threestup/contactifications/slackutil"
+	"github.com/Threestup/contactifications/templateutil"
 )
 
 const (
@@ -41,9 +41,6 @@ var (
 	errMethodNotAllowed   = errors.New("method not allowed")
 	errPageNotFound       = errors.New("page not found")
 	errInvalidContentType = errors.New("invalid content-type")
-
-	// path names to template
-	templatesMessages = map[string]*template.Template{}
 )
 
 type handler struct{}
@@ -65,7 +62,7 @@ func (h handler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 
 	// try to match the path with one of the existings templates
 	var tpl *template.Template
-	for k, v := range templatesMessages {
+	for k, v := range templateutil.TemplatesMessages {
 		if r.URL.Path != path.Join(basePath, k) {
 			tpl = v
 			break
@@ -138,38 +135,6 @@ func dirExists(s string) (bool, error) {
 	return true, err
 }
 
-// list files the
-func generateTemplates() error {
-	files, err := ioutil.ReadDir(cmd.TemplatesDir)
-	if err != nil {
-		return err
-	}
-
-	// for all file if they are not dirs, and finish with a .tpl extension
-	for _, file := range files {
-		if !file.IsDir() && strings.HasSuffix(file.Name(), ".tpl") {
-			name := "/" + strings.TrimSuffix(file.Name(), ".tpl")
-
-			// read file
-			b, err := ioutil.ReadFile(path.Join(cmd.TemplatesDir, file.Name()))
-			if err != nil {
-				return err
-			}
-			tpl, err := template.New(name).Parse(string(b))
-			if err != nil {
-				return fmt.Errorf("unable to parse message template: %v", err)
-			}
-
-			templatesMessages[name] = tpl
-
-		} else {
-			fmt.Printf("ignored file or directory: %v", file.Name())
-		}
-	}
-
-	return nil
-}
-
 func main() {
 	if err := cmd.Cmd.Execute(); err != nil {
 		return
@@ -194,7 +159,7 @@ func main() {
 	}
 
 	// generate messages template
-	if err := generateTemplates(); err != nil {
+	if err := templateutil.LoadFromDir(cmd.TemplatesDir); err != nil {
 		fmt.Printf("%v\n", err)
 		return
 	}
