@@ -1,5 +1,5 @@
 hash: 06adc0eb236da539c5e42fbb18b41ffda95862eaf7f488bfae6f156129364e23
-updated: 2018-01-29T16:46:55.093202Z
+updated: 2018-01-29T18:54:58.477655Z
 imports:
 - name: github.com/gorilla/websocket
   version: 91f589db023d66e4aba7112d44cc0d2fb091c553
@@ -7,6 +7,8 @@ imports:
   version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
 - name: github.com/nlopes/slack
   version: 280245264a9d8c496e95ead447421d37cd95f93a
+- name: github.com/rs/cors
+  version: feef513b9575b32f84bafa580aad89b011259019
 - name: github.com/spf13/cobra
   version: 7b1b6e8dc027253d45fc029bc269d1c019f83a34
 - name: github.com/spf13/pflag

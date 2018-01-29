@@ -30,6 +30,7 @@ import (
 	"github.com/Threestup/aporosa/cmd"
 	"github.com/Threestup/aporosa/slackutil"
 	"github.com/Threestup/aporosa/templateutil"
+	"github.com/rs/cors"
 )
 
 const (
@@ -176,7 +177,10 @@ func main() {
 		fmt.Printf("\tPOST %v\n", path.Join(basePath, k))
 	}
 
-	srv := http.Server{Addr: ":" + cmd.Port, Handler: handler{}}
+	srv := http.Server{
+		Addr:    ":" + cmd.Port,
+		Handler: cors.AllowAll().Handler(handler{}),
+	}
 	go func() {
 		fmt.Printf("Server started on :%s\n", cmd.Port)
 		srv.ListenAndServe()
