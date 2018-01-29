@@ -1,16 +1,32 @@
 hash: 06adc0eb236da539c5e42fbb18b41ffda95862eaf7f488bfae6f156129364e23
-updated: 2018-01-29T18:54:58.477655Z
+updated: 2018-01-29T19:12:36.742146Z
 imports:
+- name: github.com/didip/tollbooth
+  version: b65680a2d5f624ed528d36f8406f31535555828a
+  subpackages:
+  - errors
+  - libstring
+  - limiter
 - name: github.com/gorilla/websocket
   version: 91f589db023d66e4aba7112d44cc0d2fb091c553
 - name: github.com/inconshreveable/mousetrap
   version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
 - name: github.com/nlopes/slack
   version: 280245264a9d8c496e95ead447421d37cd95f93a
+- name: github.com/patrickmn/go-cache
+  version: a3647f8e31d79543b2d0f0ae2fe5c379d72cedc0
 - name: github.com/rs/cors
   version: feef513b9575b32f84bafa580aad89b011259019
 - name: github.com/spf13/cobra
   version: 7b1b6e8dc027253d45fc029bc269d1c019f83a34
 - name: github.com/spf13/pflag
   version: f1d95a35e132e8a1868023a08932b14f0b8b8fcb
+- name: golang.org/x/net
+  version: 1c05540f6879653db88113bc4a2b70aec4bd491f
+  subpackages:
+  - context
+- name: golang.org/x/time
+  version: 6dc17368e09b0e8634d71cac8168d853e869a0c7
+  subpackages:
+  - rate
 testImports: []

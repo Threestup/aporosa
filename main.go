@@ -30,6 +30,8 @@ import (
 	"github.com/Threestup/aporosa/cmd"
 	"github.com/Threestup/aporosa/slackutil"
 	"github.com/Threestup/aporosa/templateutil"
+	"github.com/didip/tollbooth"
+	"github.com/didip/tollbooth/limiter"
 	"github.com/rs/cors"
 )
 
@@ -177,9 +179,12 @@ func main() {
 		fmt.Printf("\tPOST %v\n", path.Join(basePath, k))
 	}
 
+	//1, nil), HelloHandler))
 	srv := http.Server{
-		Addr:    ":" + cmd.Port,
-		Handler: cors.AllowAll().Handler(handler{}),
+		Addr: ":" + cmd.Port,
+		Handler: tollbooth.LimitHandler(
+			tollbooth.NewLimiter(1, &limiter.ExpirableOptions{DefaultExpirationTTL: time.Minute * 30}),
+			cors.AllowAll().Handler(handler{})),
 	}
 	go func() {
 		fmt.Printf("Server started on :%s\n", cmd.Port)
