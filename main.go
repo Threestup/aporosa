@@ -172,7 +172,7 @@ func main() {
 		syscall.SIGQUIT)
 
 	fmt.Printf("Available forms:\n")
-	for k, _ := range templateutil.TemplatesMessages {
+	for k := range templateutil.TemplatesMessages {
 		fmt.Printf("\tPOST %v\n", path.Join(basePath, k))
 	}
 
