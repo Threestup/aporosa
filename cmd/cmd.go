@@ -3,15 +3,24 @@ package cmd
 import "github.com/spf13/cobra"
 
 var (
-	Port         string
-	SlackToken   string
+	// Port to listen for HTTP requests
+	Port string
+	// SlackToken to initialize the slack client with the user slack
+	SlackToken string
+	// SlackChannel to which send the notification
 	SlackChannel string
-	OutDir       string
-	CompanyName  string
-	WebsiteURL   string
-	LogoURL      string
+	// OutDir directory to save the raw json forms data
+	OutDir string
+	// CompanyName User company name
+	CompanyName string
+	// WebsiteURL User website
+	WebsiteURL string
+	// LogoURL User logo
+	LogoURL string
+	// TemplatesDir Directory to search for templates
 	TemplatesDir string
 
+	// Cmd Root command of the program
 	Cmd = &cobra.Command{
 		Use:   "contactification",
 		Short: "contactification is a simple tool to send contact informations to slack",

@@ -9,10 +9,11 @@ import (
 )
 
 var (
-	// path names to template
+	// TemplatesMessages path names to template
 	TemplatesMessages = map[string]*template.Template{}
 )
 
+// LoadFromDir load templates from a directory
 func LoadFromDir(dir string) error {
 	files, err := ioutil.ReadDir(dir)
 	if err != nil {

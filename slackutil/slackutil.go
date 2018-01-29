@@ -16,6 +16,7 @@ var (
 	slackClient *slack.Client
 )
 
+// Init initialize the package
 func Init() error {
 	slackClient = slack.New(cmd.SlackToken)
 	if slackClient == nil {
@@ -24,6 +25,7 @@ func Init() error {
 	return nil
 }
 
+// Notify send a new notification to the slack channel
 func Notify(tpl *template.Template, values map[string]string) error {
 	// use template to generate the message
 	var msg bytes.Buffer
