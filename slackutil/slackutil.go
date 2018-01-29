@@ -8,7 +8,7 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/Threestup/contactifications/cmd"
+	"github.com/Threestup/aporosa/cmd"
 	"github.com/nlopes/slack"
 )
 

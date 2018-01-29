@@ -19,6 +19,6 @@
 
 
 # End of https://www.gitignore.io/api/go
-contactifications
+aporosa
 .env
 vendor

@@ -1,8 +1,8 @@
 version: "2.0"
 services:
-  contactifications:
+  aporosa:
     build: .
-    image: contactifications
+    image: aporosa
     env_file:
       - .env
     command: --slackToken="${SLACK_TOKEN}" --slackChannel="${SLACK_CHANNEL}" --companyName="${COMPANY_NAME}" --logoURL="${LOGO_URL}" --websiteURL="${WEBSITE_URL}"

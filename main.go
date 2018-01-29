@@ -27,13 +27,13 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/Threestup/contactifications/cmd"
-	"github.com/Threestup/contactifications/slackutil"
-	"github.com/Threestup/contactifications/templateutil"
+	"github.com/Threestup/aporosa/cmd"
+	"github.com/Threestup/aporosa/slackutil"
+	"github.com/Threestup/aporosa/templateutil"
 )
 
 const (
-	basePath              = "/autoform"
+	basePath              = "/aporosa"
 	urlEncodedContentType = "application/x-www-form-urlencoded"
 )
 
@@ -63,7 +63,7 @@ func (h handler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	// try to match the path with one of the existings templates
 	var tpl *template.Template
 	for k, v := range templateutil.TemplatesMessages {
-		if r.URL.Path != path.Join(basePath, k) {
+		if path.Clean(r.URL.Path) == path.Clean(path.Join(basePath, k)) {
 			tpl = v
 			break
 		}
@@ -171,8 +171,12 @@ func main() {
 		syscall.SIGTERM,
 		syscall.SIGQUIT)
 
-	srv := http.Server{Addr: ":" + cmd.Port, Handler: handler{}}
+	fmt.Printf("Available forms:\n")
+	for k, _ := range templateutil.TemplatesMessages {
+		fmt.Printf("\tPOST %v\n", path.Join(basePath, k))
+	}
 
+	srv := http.Server{Addr: ":" + cmd.Port, Handler: handler{}}
 	go func() {
 		fmt.Printf("Server started on :%s\n", cmd.Port)
 		srv.ListenAndServe()
