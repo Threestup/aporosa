@@ -1,12 +1,16 @@
 language: go
+
 go:
   - 1.9.x
+
 services:
   - docker
+
 script:
   - export MAYBE_GIT_TAG=`git describe --exact-match --abbrev=0 --tags`
   - export TAG=`if [[ $MAYBE_GIT_TAG != "" ]]; then echo $MAYBE_GIT_TAG; elif [[ $TRAVIS_BRANCH == "master" ]]; then echo "latest"; else echo ""; fi`
   - docker build -t $REPO:$TAG .
+
 after_success:
   - docker login -u $DOCKER_USER -p $DOCKER_PASS
   - if [[ $TAG != "" ]]; then
@@ -14,6 +18,7 @@ after_success:
   docker push $REPO:$TRAVIS_BUILD_NUMBER;
   docker push $REPO:$TAG
   fi
+
 env:
   global:
   - REPO=threestup/aporosa
