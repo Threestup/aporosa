@@ -4,7 +4,7 @@ go:
 services:
   - docker
 script:
-  - MAYBE_GIT_TAG=`git describe --exact-match --abbrev=0 --tags`
+  - export MAYBE_GIT_TAG=`git describe --exact-match --abbrev=0 --tags`
   - export TAG=`if [[ $MAYBE_GIT_TAG != "" ]]; then echo $MAYBE_GIT_TAG; elif [[ $TRAVIS_BRANCH == "master" ]]; then echo "latest"; else echo ""; fi`
   - docker build -t $REPO:$TAG .
 after_success:
