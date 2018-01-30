@@ -18,7 +18,7 @@ after_success:
     if [[ $TRAVIS_TAG != "" ]]; then
     docker tag "$REPO:$TAG" "$REPO:$TRAVIS_TAG";
     docker push "$REPO:$TRAVIS_TAG";
-    fi
+    fi;
     docker tag "$REPO:$TAG" "$REPO:build-$TRAVIS_BUILD_NUMBER";
     docker push "$REPO:$TRAVIS_BUILD_NUMBER";
     docker push "$REPO:$TAG";
