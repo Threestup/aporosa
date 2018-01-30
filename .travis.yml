@@ -20,7 +20,7 @@ after_success:
     docker push "$REPO:$TRAVIS_TAG";
     fi;
     docker tag "$REPO:$TAG" "$REPO:build-$TRAVIS_BUILD_NUMBER";
-    docker push "$REPO:$TRAVIS_BUILD_NUMBER";
+    docker push "$REPO:build-$TRAVIS_BUILD_NUMBER";
     docker push "$REPO:$TAG";
     fi
 
