@@ -8,9 +8,9 @@ services:
 
 script:
   - export REPO=threestup/aporosa
-  - export TAG_LATEST=latest
+  - export TAG=latest
   - export WILL_DEPLOY=`if [[ $TRAVIS_TAG != "" ]]; then echo "YES"; elif [[ $TRAVIS_BRANCH == "master" ]]; then echo "YES"; else echo "NO"; fi`
-  - docker build -t "$REPO:$TAG_lATEST" .
+  - docker build -t "$REPO:$TAG" .
 
 after_success:
   - docker login -u $DOCKER_USER -p $DOCKER_PASS
