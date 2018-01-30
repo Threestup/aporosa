@@ -9,7 +9,7 @@ services:
 script:
   - export REPO=threestup/aporosa
   - export TAG=latest
-  - export WILL_DEPLOY=`if [[ $TRAVIS_TAG != "" ]]; then echo "YES"; elif [[ $TRAVIS_BRANCH == "master" ]]; then echo "YES"; else echo "NO"; fi`
+  - export WILL_DEPLOY=`if [[ $TRAVIS_TAG != "" ]] || [[ $TRAVIS_BRANCH == "master" ]]; then echo "YES"; else echo "NO"; fi`
   - docker build -t "$REPO:$TAG" .
 
 after_success:
@@ -17,7 +17,7 @@ after_success:
   - if [[ $WILL_DEPLOY == "YES" ]]; then
     if [[ $TRAVIS_TAG != "" ]]; then
     docker tag "$REPO:$TAG" "$REPO:$TRAVIS_TAG";
-    docker push "$REPO:$TRAVIS_TAG"
+    docker push "$REPO:$TRAVIS_TAG";
     fi
     docker tag "$REPO:$TAG" "$REPO:build-$TRAVIS_BUILD_NUMBER";
     docker push "$REPO:$TRAVIS_BUILD_NUMBER";
