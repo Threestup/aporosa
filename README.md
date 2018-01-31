@@ -24,6 +24,11 @@ docker run --rm -d -p 8080:8080 \
 	--logoURL="https://threestup.com/ts-logomark-64.png" \
 	--websiteURL="https://threestup.com" \
 	--port=8080
+  --exportMode=JSON
 ```
 
 Also you can clone the git repository, and use the docker-compose configuration to run the service, you will just need toupdate the .env file in order to set the parameter you to pass to aporosa.
+
+### How to build locally
+Just clone the repository, then go to the root of the repository and run:
+> go build

@@ -15,10 +15,8 @@
 package main
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"os/signal"
@@ -28,6 +26,7 @@ import (
 	"time"
 
 	"github.com/Threestup/aporosa/cmd"
+	"github.com/Threestup/aporosa/export"
 	"github.com/Threestup/aporosa/slackutil"
 	"github.com/Threestup/aporosa/templateutil"
 	"github.com/didip/tollbooth"
@@ -73,7 +72,7 @@ func (h handler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	if tpl == nil {
-		earlyExitWithError(rw, r, errPageNotFound, http.StatusNotFound)
+		earlyExitWithError(rw, r, fmt.Errorf("%v:%v", errPageNotFound, r.URL.Path), http.StatusNotFound)
 		return
 	}
 
@@ -90,7 +89,7 @@ func (h handler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	// then write them to a new_file
-	if err := saveContact(values); err != nil {
+	if err := export.Save(tpl.Name(), values); err != nil {
 		earlyExitWithError(rw, r, err, http.StatusInternalServerError)
 		return
 	}
@@ -105,26 +104,6 @@ func (h handler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 		r.RemoteAddr, time.Now().Format("Mon, 2 Jan 2006 15:04:05 MST"))
 	rw.WriteHeader(http.StatusOK)
 	fmt.Fprintf(rw, "")
-}
-
-func saveContact(values map[string]string) error {
-	fmt.Printf("new contact infos: %v\n", values)
-
-	// make json
-	b, err := json.Marshal(values)
-	if err != nil {
-		return fmt.Errorf("unable to marshal contact infos: %v", err)
-	}
-
-	// writing file
-	now := fmt.Sprintf("%v", time.Now().Unix())
-	filePath := path.Join(cmd.OutDir, now+".contact.json")
-	err = ioutil.WriteFile(filePath, b, 0644)
-	if err != nil {
-		return fmt.Errorf("unable to write file: %v", err)
-	}
-
-	return nil
 }
 
 func dirExists(s string) (bool, error) {
@@ -163,6 +142,12 @@ func main() {
 
 	// generate messages template
 	if err := templateutil.LoadFromDir(cmd.TemplatesDir); err != nil {
+		fmt.Printf("%v\n", err)
+		return
+	}
+
+	// init export package
+	if err := export.Init(cmd.ExportMode); err != nil {
 		fmt.Printf("%v\n", err)
 		return
 	}

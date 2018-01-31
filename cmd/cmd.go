@@ -19,6 +19,8 @@ var (
 	LogoURL string
 	// TemplatesDir Directory to search for templates
 	TemplatesDir string
+	// ExportMode to save inputs
+	ExportMode string
 
 	// Cmd Root command of the program
 	Cmd = &cobra.Command{
@@ -37,6 +39,7 @@ func init() {
 	Cmd.PersistentFlags().StringVar(&WebsiteURL, "websiteURL", "", "website where the form is used")
 	Cmd.PersistentFlags().StringVar(&LogoURL, "logoURL", "", "logo URL")
 	Cmd.PersistentFlags().StringVar(&TemplatesDir, "templatesDir", "./templates", "template dir for the messages to display in slack")
+	Cmd.PersistentFlags().StringVar(&ExportMode, "exportMode", "CSV", "which form to save the forms locally")
 
 	Cmd.MarkPersistentFlagRequired("slackChannel")
 	Cmd.MarkPersistentFlagRequired("slackToken")
