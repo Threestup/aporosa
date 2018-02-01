@@ -36,6 +36,7 @@ import (
 
 const (
 	basePath              = "/aporosa"
+	healthCheckPath       = basePath + "/healthcheck"
 	urlEncodedContentType = "application/x-www-form-urlencoded"
 )
 
@@ -55,8 +56,19 @@ func earlyExitWithError(rw http.ResponseWriter, r *http.Request, err error, stat
 }
 
 func (h handler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
-	// first check the request is well formated
+	start := time.Now()
+	defer func() {
+		fmt.Printf("method=%v path=%v from=%v ts=%v time-taken=%v\n",
+			r.Method, r.URL.Path, r.RemoteAddr, time.Now().Format("Mon, 2 Jan 2006 15:04:05 MST"), time.Since(start))
+	}()
 
+	if r.URL.Path == healthCheckPath {
+		rw.WriteHeader(http.StatusOK)
+		fmt.Fprintf(rw, "")
+		return
+	}
+
+	// first check the request is well formated
 	if r.Method != http.MethodPost {
 		earlyExitWithError(rw, r, errMethodNotAllowed, http.StatusMethodNotAllowed)
 		return
@@ -100,8 +112,6 @@ func (h handler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Printf("from=%v error=\"none\" ts=%v\n",
-		r.RemoteAddr, time.Now().Format("Mon, 2 Jan 2006 15:04:05 MST"))
 	rw.WriteHeader(http.StatusOK)
 	fmt.Fprintf(rw, "")
 }
