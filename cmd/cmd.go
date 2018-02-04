@@ -1,6 +1,12 @@
 package cmd
 
-import "github.com/spf13/cobra"
+import (
+	"fmt"
+	"os"
+
+	"github.com/Threestup/aporosa/version"
+	"github.com/spf13/cobra"
+)
 
 var (
 	// Port to listen for HTTP requests
@@ -21,12 +27,30 @@ var (
 	TemplatesDir string
 	// ExportMode to save inputs
 	ExportMode string
+	// HelpFlag was the help command executed
+	HelpFlag = false
 
 	// Cmd Root command of the program
 	Cmd = &cobra.Command{
-		Use:   "contactification",
-		Short: "contactification is a simple tool to send contact informations to slack",
+		Use:   "aporosa",
+		Short: "aporosa is a simple tool to send forms contents to slack",
 		Run:   func(cmd *cobra.Command, args []string) {},
+	}
+
+	helpCmd = Cmd.HelpFunc()
+
+	newHelpCmd = func(c *cobra.Command, args []string) {
+		HelpFlag = true
+		helpCmd(c, args)
+	}
+
+	versionCmd = &cobra.Command{
+		Use:   "version",
+		Short: "display version",
+		Run: func(cmd *cobra.Command, args []string) {
+			fmt.Printf("aporosa version %s (%s)", version.Release, version.Commit)
+			os.Exit(0)
+		},
 	}
 )
 
@@ -46,4 +70,7 @@ func init() {
 	Cmd.MarkPersistentFlagRequired("companyName")
 	Cmd.MarkPersistentFlagRequired("websiteURL")
 	Cmd.MarkPersistentFlagRequired("logoURL")
+
+	Cmd.AddCommand(versionCmd)
+	Cmd.SetHelpFunc(newHelpCmd)
 }

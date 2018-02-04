@@ -132,6 +132,10 @@ func main() {
 		return
 	}
 
+	if cmd.HelpFlag {
+		os.Exit(0)
+	}
+
 	// check output dir exsits
 	if ok, err := dirExists(cmd.OutDir); !ok {
 		fmt.Printf("%v\n", err)
