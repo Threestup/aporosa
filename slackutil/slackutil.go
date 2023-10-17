@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/Threestup/aporosa/cmd"
-	"github.com/nlopes/slack"
+	"github.com/slack-go/slack"
 )
 
 var (
@@ -25,38 +25,38 @@ func Init() error {
 	return nil
 }
 
-// Notify send a new notification to the slack channel
+// Notify sends a new notification to the Slack channel
 func Notify(tpl *template.Template, values map[string]string) error {
-	// use template to generate the message
+	// Use the template to generate the message
 	var msg bytes.Buffer
 	err := tpl.Execute(&msg, values)
 	if err != nil {
 		return fmt.Errorf("unable to build template: %v", err)
 	}
 
-	att := slack.Attachment{
+	attachment := slack.Attachment{
 		AuthorIcon: cmd.LogoURL,
 		AuthorName: cmd.CompanyName,
 		Title:      fmt.Sprintf("New contact request for %s", cmd.CompanyName),
 		TitleLink:  cmd.WebsiteURL,
 		Footer:     "New contact request",
 		Ts:         json.Number(fmt.Sprintf("%v", time.Now().Unix())),
-		Text:       fmt.Sprintf(msg.String()),
+		Text:       msg.String(),
 		MarkdownIn: []string{"text"},
 		ThumbURL:   cmd.LogoURL,
 	}
 
-	_, _, err = slackClient.PostMessage(
-		cmd.SlackChannel,
-		"",
-		slack.PostMessageParameters{
-			EscapeText: true,
-			Username:   "NewContact",
-			AsUser:     true,
-			// IconURL:     "https://.slack.com/team/jeremy",
-			Attachments: []slack.Attachment{att},
-		},
-	)
+	// Create a message option for attaching the attachment
+	options := []slack.MsgOption{
+		slack.MsgOptionText("", false),         // The text is empty here
+		slack.MsgOptionAttachments(attachment), // Attach the attachment here
+	}
+
+	// Specify the channel where you want to send the message
+	channelID := cmd.SlackChannel
+
+	// Send the message
+	_, _, err = slackClient.PostMessage(channelID, options...)
 
 	if err != nil {
 		return fmt.Errorf("unable to send slack message: %v", err)
